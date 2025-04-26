@@ -6,6 +6,7 @@ RUN apk add python3 py3-pip pythonispython3
 
 COPY package.json yarn.lock ./
 
+RUN corepack enable && corepack prepare yarn@3.2.3
 RUN yarn install --production
 
 COPY . .
