@@ -1,13 +1,22 @@
-FROM node:latest
+FROM node:20-alpine as builder
 
 WORKDIR /app/medusa
 
+RUN apk add python3 py3-pip pythonispython3
+
+COPY package.json yarn.lock ./
+
+RUN yarn install --production
+
 COPY . .
-
-RUN apt-get update && apt-get install -y python3 python3-pip python-is-python3
-
-RUN yarn
 
 RUN yarn build
 
-CMD yarn db:migrate && yarn start
+FROM node:20-alpine as production
+
+WORKDIR /app/medusa
+
+COPY --from=builder /app/medusa/.medusa/server .
+COPY --from=builder /app/medusa/node_modules ./node_modules
+
+CMD yarn start
